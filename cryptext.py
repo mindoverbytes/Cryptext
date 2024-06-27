@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import simpledialog
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
@@ -98,8 +98,15 @@ class CryptextApp:
         self.verify_btn = tk.Button(root, text="Verify Hash (SHA-256)", command=self.verify_hash)
         self.verify_btn.grid(row=8, column=1, padx=10, pady=10)
 
+        self.message_label = tk.Label(root, text="", fg="black")
+        self.message_label.grid(row=9, columnspan=2, padx=10, pady=10)
+
+        # Generate keys at the start
         self.key = generate_aes_key()
         self.private_key, self.public_key = generate_rsa_keys()
+
+    def set_message(self, message):
+        self.message_label.config(text=message)
 
     def encrypt_text_aes(self):
         text = self.text_plaintext.get("1.0", tk.END).strip()
@@ -107,8 +114,9 @@ class CryptextApp:
             encrypted_text = encrypt_aes(text, self.key)
             self.text_encrypted.delete("1.0", tk.END)
             self.text_encrypted.insert(tk.END, encrypted_text)
+            self.set_message("Text encrypted successfully.")
         else:
-            messagebox.showerror("Error", "No text provided!")
+            self.set_message("Error: No text provided!")
 
     def decrypt_text_aes(self):
         enc_text = self.text_encrypted.get("1.0", tk.END).strip()
@@ -117,10 +125,11 @@ class CryptextApp:
                 decrypted_text = decrypt_aes(enc_text, self.key)
                 self.text_decrypted.delete("1.0", tk.END)
                 self.text_decrypted.insert(tk.END, decrypted_text)
+                self.set_message("Text decrypted successfully.")
             except Exception as e:
-                messagebox.showerror("Error", f"Decryption failed: {e}")
+                self.set_message(f"Decryption failed: {e}")
         else:
-            messagebox.showerror("Error", "No text provided!")
+            self.set_message("Error: No text provided!")
 
     def encrypt_text_rsa(self):
         text = self.text_plaintext.get("1.0", tk.END).strip()
@@ -128,8 +137,9 @@ class CryptextApp:
             encrypted_text = encrypt_rsa(text, self.public_key)
             self.text_encrypted.delete("1.0", tk.END)
             self.text_encrypted.insert(tk.END, encrypted_text)
+            self.set_message("Text encrypted successfully.")
         else:
-            messagebox.showerror("Error", "No text provided!")
+            self.set_message("Error: No text provided!")
 
     def decrypt_text_rsa(self):
         enc_text = self.text_encrypted.get("1.0", tk.END).strip()
@@ -138,10 +148,11 @@ class CryptextApp:
                 decrypted_text = decrypt_rsa(enc_text, self.private_key)
                 self.text_decrypted.delete("1.0", tk.END)
                 self.text_decrypted.insert(tk.END, decrypted_text)
+                self.set_message("Text decrypted successfully.")
             except Exception as e:
-                messagebox.showerror("Error", f"Decryption failed: {e}")
+                self.set_message(f"Decryption failed: {e}")
         else:
-            messagebox.showerror("Error", "No text provided!")
+            self.set_message("Error: No text provided!")
 
     def generate_hash(self):
         text = self.text_plaintext.get("1.0", tk.END).strip()
@@ -149,19 +160,20 @@ class CryptextApp:
             hash_value = generate_sha256_hash(text)
             self.text_hash.delete("1.0", tk.END)
             self.text_hash.insert(tk.END, hash_value)
+            self.set_message("Hash generated successfully.")
         else:
-            messagebox.showerror("Error", "No text provided!")
+            self.set_message("Error: No text provided!")
 
     def verify_hash(self):
         text = self.text_plaintext.get("1.0", tk.END).strip()
         hash_value = self.text_hash_to_verify.get("1.0", tk.END).strip()
         if text and hash_value:
             if verify_sha256_hash(text, hash_value):
-                messagebox.showinfo("Success", "Hash verification succeeded!")
+                self.set_message("Hash verification succeeded!")
             else:
-                messagebox.showerror("Error", "Hash verification failed!")
+                self.set_message("Hash verification failed!")
         else:
-            messagebox.showerror("Error", "No text or hash value provided!")
+            self.set_message("Error: No text or hash value provided!")
 
 if __name__ == "__main__":
     root = tk.Tk()
